@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from glob import glob
 
 
 def class_define(arousal, valence):
@@ -10,11 +11,10 @@ def class_define(arousal, valence):
     return dict_class[(ar, val)]
 
 
-df = pd.read_csv('/home/den/datasets/iemocap/meta.csv', sep=';')
-df['activation'] = df['activation'].map(round)
-df['valence'] = df['valence'].map(round)
-df['valence'] = [x if x <=5  else 5 for x in df['valence'] ]
+def add_arvalmix(path_to_meta):
+    for meta in glob(path_to_meta + "/*.csv"):
+        df = pd.read_csv(meta, sep=';')
 
-df['arvalmix'] = [class_define(x,y) for x,y in zip(df['activation'], df['valence'])]
-
-print(df)
+        temp = [x if x <=5  else 5 for x in df['valence'].map(round) ]
+        df['arvalmix'] = [class_define(x,y) for x,y in zip(df['activation'].map(round), temp)]
+        df.to_csv(meta, index=False, sep=';')
